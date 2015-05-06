@@ -39,6 +39,19 @@ module Restforce
 
     end
 
+    class SimpleTracker
+      attr_reader :last_run
+
+      def initialize(time)
+        @last_run = time
+        Restforce::DB.last_run = @last_run
+      end
+
+      def track(time)
+        @last_run = time
+      end
+    end
+
   end
 
 end

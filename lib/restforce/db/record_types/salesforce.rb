@@ -115,8 +115,10 @@ module Restforce
 
         def create!(from_record)
           super
+          log "    SUCCESS -> Salesforce: #{from_record.attributes.inspect}"
         rescue => e
-          log e
+          log "    ERROR   -> Salesforce: #{from_record.attributes.inspect}"
+          log "      #{e}"
         end
       end
 
