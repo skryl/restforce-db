@@ -23,12 +23,22 @@ module Restforce
       #           config   - The path to a client configuration file.
       #           verbose  - Display command line output? Defaults to false.
       def initialize(options = {})
-        @verbose = options.fetch(:verbose) { false }
+        @registry = options.fetch(:registry) { Restforce::DB::Registry }
         @interval = options.fetch(:interval) { DEFAULT_INTERVAL }
-        @delay = options.fetch(:delay) { DEFAULT_DELAY }
+        @delay    = options.fetch(:delay)    { DEFAULT_DELAY }
+        @verbose  = options.fetch(:verbose)  { false }
+        @logger   = options.fetch(:logger)
+        @tracker  = options.fetch(:tracker)
 
         DB.reset
-        DB.configure { |config| config.parse(options[:config]) }
+        DB.configure do |config|
+          case options[:config]
+          when Hash
+            config.load(options[:config])
+          when String
+            config.parse(options[:config])
+          end
+        end
       end
 
       # Public: Start the polling loop for this Worker. Synchronizes all
@@ -78,7 +88,7 @@ module Restforce
           runner.tick!
           @changes = Hash.new { |h, k| h[k] = Accumulator.new }
 
-          Restforce::DB::Registry.each do |mapping|
+          @registry.each do |mapping|
             task("PROPAGATING RECORDS", mapping) { propagate mapping }
             task("CLEANING RECORDS", mapping) { clean mapping }
             task("COLLECTING CHANGES", mapping) { collect mapping }
@@ -87,7 +97,7 @@ module Restforce
 
           # NOTE: We can only perform the synchronization after all record
           # changes have been aggregated, so this second loop is necessary.
-          Restforce::DB::Registry.each do |mapping|
+          @registry.each do |mapping|
             task("APPLYING CHANGES", mapping) { synchronize mapping }
           end
         end
