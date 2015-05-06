@@ -6,16 +6,18 @@ module Restforce
     # and Salesforce fields, providing utilities to transform hashes of
     # attributes from one to the other.
     class Mapping
+      extend Forwardable
 
       class InvalidMappingError < StandardError; end
 
-      extend Forwardable
       def_delegators(
         :attribute_map,
         :attributes,
         :convert,
         :convert_from_salesforce,
       )
+
+      def_delegators :@worker, :log
 
       attr_reader(
         :database_model,
@@ -37,18 +39,18 @@ module Restforce
       # database_model   - A Class compatible with ActiveRecord::Base.
       # salesforce_model - A String name of an object type in Salesforce.
       # strategy         - A synchronization Strategy object.
-      def initialize(database_model, salesforce_model, strategy = Strategies::Always.new)
+      def initialize(database_model, salesforce_model, strategy = Strategies::Always.new, opts = {})
         @database_model = database_model
         @salesforce_model = salesforce_model
 
-        @database_record_type = RecordTypes::ActiveRecord.new(database_model, self)
-        @salesforce_record_type = RecordTypes::Salesforce.new(salesforce_model, self)
+        @database_record_type   = (opts[:database_record_type]   || RecordTypes::ActiveRecord).new(database_model, self)
+        @salesforce_record_type = (opts[:salesforce_record_type] || RecordTypes::Salesforce).new(salesforce_model, self)
 
-        self.fields = {}
-        self.conversions = {}
-        self.associations = []
-        self.conditions = []
-        self.strategy = strategy
+        self.fields       = opts[:fields] || {}
+        self.conversions  = opts[:conversions] || {}
+        self.associations = opts[:associations] || []
+        self.conditions   = opts[:conditions] || []
+        self.strategy     = strategy
       end
 
       # Public: Get a list of the relevant Salesforce field names for this
@@ -101,6 +103,12 @@ module Restforce
         yield self
       ensure
         @conditions = criteria
+      end
+
+      def for_worker(worker)
+        @worker = worker
+        yield
+        @worker = nil
       end
 
       private

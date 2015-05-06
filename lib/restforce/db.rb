@@ -1,4 +1,5 @@
 require "time"
+require "forwardable"
 require "restforce"
 
 require "restforce/extensions"

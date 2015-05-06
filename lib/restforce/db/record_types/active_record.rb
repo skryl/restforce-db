@@ -102,6 +102,17 @@ module Restforce
 
       end
 
+      class ActiveRecordLog < ActiveRecord
+        extend Forwardable
+        def_delegators :@mapping, :log
+
+        def create!(from_record)
+          super
+        rescue => e
+          log e
+        end
+      end
+
     end
 
   end

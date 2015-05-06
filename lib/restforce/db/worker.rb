@@ -89,16 +89,20 @@ module Restforce
           @changes = Hash.new { |h, k| h[k] = Accumulator.new }
 
           @registry.each do |mapping|
-            task("PROPAGATING RECORDS", mapping) { propagate mapping }
-            task("CLEANING RECORDS", mapping) { clean mapping }
-            task("COLLECTING CHANGES", mapping) { collect mapping }
-            task("UPDATING ASSOCIATIONS", mapping) { associate mapping }
+            mapping.for_worker(self) do
+              task("PROPAGATING RECORDS",   mapping)   { propagate mapping }
+              task("CLEANING RECORDS",      mapping)   { clean     mapping }
+              task("COLLECTING CHANGES",    mapping)   { collect   mapping }
+              task("UPDATING ASSOCIATIONS", mapping)   { associate mapping }
+            end
           end
 
           # NOTE: We can only perform the synchronization after all record
           # changes have been aggregated, so this second loop is necessary.
           @registry.each do |mapping|
-            task("APPLYING CHANGES", mapping) { synchronize mapping }
+            mapping.for_worker(self) do
+              task("APPLYING CHANGES", mapping)      { synchronize mapping }
+            end
           end
         end
       end

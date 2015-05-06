@@ -109,6 +109,17 @@ module Restforce
 
       end
 
+      class SalesforceLog < Salesforce
+        extend Forwardable
+        def_delegators :@mapping, :log
+
+        def create!(from_record)
+          super
+        rescue => e
+          log e
+        end
+      end
+
     end
 
   end
