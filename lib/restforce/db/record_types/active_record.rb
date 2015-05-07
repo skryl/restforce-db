@@ -28,7 +28,7 @@ module Restforce
             associations.each { |association| association.touch(:synchronized_at) }
           end
 
-          Instances::ActiveRecord.new(@record_type, record, @mapping).after_sync
+          instance_type.new(@record_type, record, @mapping).after_sync
         end
 
         # Public: Find the instance of this ActiveRecord model corresponding to
@@ -41,7 +41,7 @@ module Restforce
           record = @record_type.find_by(@mapping.lookup_column => id)
           return nil unless record
 
-          Instances::ActiveRecord.new(@record_type, record, @mapping)
+          instance_type.new(@record_type, record, @mapping)
         end
 
         # Public: Get a collection of all modified ActiveRecord records of this
@@ -61,7 +61,7 @@ module Restforce
           scope = scope.where("updated_at >= ?", options[:after]) if options[:after]
 
           scope.map do |record|
-            Instances::ActiveRecord.new(@record_type, record, @mapping)
+            instance_type.new(@record_type, record, @mapping)
           end
         end
 
@@ -90,6 +90,10 @@ module Restforce
 
         private
 
+        def instance_type
+          Instances::ActiveRecord
+        end
+
         # Internal: Has this Salesforce record already been linked to a database
         # record of this type?
         #
@@ -107,11 +111,16 @@ module Restforce
         def_delegators :@mapping, :log
 
         def create!(from_record)
-          super
-          log "    SUCCESS -> Database: #{from_record.attributes.inspect}"
+          super.tap do |instance|
+            log "    SUCCESS -> Database: #{instance.attributes.inspect}"
+          end
         rescue => e
           log "    ERROR   -> Database: #{from_record.attributes.inspect}"
           log "      #{e}"
+        end
+
+        def instance_type
+          Instances::ActiveRecordLog
         end
       end
 

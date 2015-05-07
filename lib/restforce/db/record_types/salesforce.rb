@@ -35,7 +35,7 @@ module Restforce
           record = DB.client.query(query(conditions)).first
           return unless record
 
-          Instances::Salesforce.new(@record_type, record, @mapping)
+          instance_type.new(@record_type, record, @mapping)
         end
 
         # Public: Find the Salesforce record corresponding to the passed id.
@@ -70,11 +70,15 @@ module Restforce
           ]
 
           DB.client.query(query(*constraints)).map do |record|
-            Instances::Salesforce.new(@record_type, record, @mapping)
+            instance_type.new(@record_type, record, @mapping)
           end
         end
 
         private
+
+        def instance_type
+          Instances::Salesforce
+        end
 
         # Internal: Get a String of values to look up when the record is
         # fetched from Salesforce. Includes all configured mappings and a
@@ -82,7 +86,7 @@ module Restforce
         #
         # Returns a String.
         def lookups
-          (Instances::Salesforce::INTERNAL_ATTRIBUTES + @mapping.salesforce_fields).uniq.join(", ")
+          (instance_type::INTERNAL_ATTRIBUTES + @mapping.salesforce_fields).uniq.join(", ")
         end
 
         # Internal: Has this database record already been linked to a Salesforce
@@ -114,11 +118,16 @@ module Restforce
         def_delegators :@mapping, :log
 
         def create!(from_record)
-          super
-          log "    SUCCESS -> Salesforce: #{from_record.attributes.inspect}"
+          super.tap do |instance|
+            log "    SUCCESS -> Salesforce: #{instance.attributes.inspect}"
+          end
         rescue => e
           log "    ERROR   -> Salesforce: #{from_record.attributes.inspect}"
           log "      #{e}"
+        end
+
+        def instance_type
+          Instances::SalesforceLog
         end
       end
 

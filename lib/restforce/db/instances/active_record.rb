@@ -48,6 +48,23 @@ module Restforce
 
       end
 
+      class ActiveRecordLog < ActiveRecord
+        extend Forwardable
+        def_delegators :@mapping, :log
+
+        def update!(attributes)
+          old_attributes = self.attributes
+          super.tap do |record|
+            log "    SUCCESS ~> Database: #{old_attributes.inspect}"
+            log "      CHANGES: #{attributes.inspect}"
+          end
+        rescue => e
+          log "    ERROR   ~> Database: #{old_attributes.inspect}"
+          log "      CHANGES: #{attributes.inspect}"
+          log "      #{e}"
+        end
+      end
+
     end
 
   end
