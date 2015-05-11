@@ -119,7 +119,7 @@ module Restforce
         include Restforce::DB::RecordTypes::Logged
 
         def instance_type
-          Instances::SalesforceLogged
+          Restforce::DB::Instances::SalesforceLogged
         end
       end
 
