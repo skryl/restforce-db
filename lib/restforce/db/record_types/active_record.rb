@@ -106,21 +106,11 @@ module Restforce
 
       end
 
-      class ActiveRecordLog < ActiveRecord
-        extend Forwardable
-        def_delegators :@mapping, :log
-
-        def create!(from_record)
-          super.tap do |instance|
-            log "    SUCCESS -> Database: #{instance.attributes.inspect}"
-          end
-        rescue => e
-          log "    ERROR   -> Database: #{from_record.attributes.inspect}"
-          log "      #{e}"
-        end
+      class ActiveRecordLogged < ActiveRecord
+        include Restforce::DB::RecordTypes::Logged
 
         def instance_type
-          Instances::ActiveRecordLog
+          Instances::ActiveRecordLogged
         end
       end
 

@@ -18,10 +18,12 @@ require "restforce/db/associations/has_many"
 require "restforce/db/associations/has_one"
 
 require "restforce/db/instances/base"
+require "restforce/db/instances/logged"
 require "restforce/db/instances/active_record"
 require "restforce/db/instances/salesforce"
 
 require "restforce/db/record_types/base"
+require "restforce/db/record_types/logged"
 require "restforce/db/record_types/active_record"
 require "restforce/db/record_types/salesforce"
 

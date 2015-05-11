@@ -45,21 +45,8 @@ module Restforce
 
       end
 
-      class SalesforceLog < Salesforce
-        extend Forwardable
-        def_delegators :@mapping, :log
-
-        def update!(attributes)
-          old_attributes = self.attributes
-          super.tap do |record|
-            log "    SUCCESS ~> Salesforce: #{old_attributes.inspect}"
-            log "      CHANGES: #{attributes.inspect}"
-          end
-        rescue => e
-          log "    ERROR   ~> Salesforce: #{old_attributes.inspect}"
-          log "      CHANGES: #{attributes.inspect}"
-          log "      #{e}"
-        end
+      class SalesforceLogged < Salesforce
+        include Restforce::DB::Instances::Logged
       end
 
     end

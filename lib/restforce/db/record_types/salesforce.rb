@@ -76,10 +76,6 @@ module Restforce
 
         private
 
-        def instance_type
-          Instances::Salesforce
-        end
-
         # Internal: Get a String of values to look up when the record is
         # fetched from Salesforce. Includes all configured mappings and a
         # handful of attributes for internal use.
@@ -111,23 +107,19 @@ module Restforce
           "select #{lookups} from #{@record_type}#{filters}"
         end
 
-      end
-
-      class SalesforceLog < Salesforce
-        extend Forwardable
-        def_delegators :@mapping, :log
-
-        def create!(from_record)
-          super.tap do |instance|
-            log "    SUCCESS -> Salesforce: #{instance.attributes.inspect}"
-          end
-        rescue => e
-          log "    ERROR   -> Salesforce: #{from_record.attributes.inspect}"
-          log "      #{e}"
-        end
+      private
 
         def instance_type
-          Instances::SalesforceLog
+          Instances::Salesforce
+        end
+
+      end
+
+      class SalesforceLogged < Salesforce
+        include Restforce::DB::RecordTypes::Logged
+
+        def instance_type
+          Instances::SalesforceLogged
         end
       end
 
