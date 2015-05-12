@@ -57,7 +57,7 @@ module Restforce
     class << self
 
       attr_accessor :last_run
-      attr_writer :configuration
+      attr_writer :client, :configuration
 
     end
 

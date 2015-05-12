@@ -29,16 +29,10 @@ module Restforce
         @verbose  = options.fetch(:verbose)  { false }
         @logger   = options.fetch(:logger)
         @tracker  = options.fetch(:tracker)
+        @exit     = options.fetch(:run_once)
 
         DB.reset
-        DB.configure do |config|
-          case options[:config]
-          when Hash
-            config.load(options[:config])
-          when String
-            config.parse(options[:config])
-          end
-        end
+        DB.configure { |config| config.parse(options[:config]) }
       end
 
       # Public: Start the polling loop for this Worker. Synchronizes all

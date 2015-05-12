@@ -23,9 +23,14 @@ module Restforce
       # file_path - A String or Path referencing a client configuration file.
       #
       # Returns nothing.
-      def parse(file_path)
-        settings = YAML.load_file(file_path)
-        load(settings["client"])
+      def parse(obj)
+        case obj
+        when Hash
+          load(obj)
+        when String
+          settings = YAML.load_file(file_path)
+          load(settings["client"])
+        end
       end
 
       # Public: Populate this configuration object from a Hash of credentials.
