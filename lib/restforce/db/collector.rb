@@ -28,8 +28,8 @@ module Restforce
         @accumulated_changes = accumulator || accumulated_changes
 
         @runner.run(@mapping) do |run|
-          run.salesforce_instances.each { |instance| accumulate(instance) }
-          run.database_instances.each { |instance| accumulate(instance) }
+          run.salesforce_instances.each { |instance| accumulate(instance) } if @strategy.to_database?
+          run.database_instances.each { |instance| accumulate(instance) }   if @strategy.to_salesforce?
         end
 
         accumulated_changes

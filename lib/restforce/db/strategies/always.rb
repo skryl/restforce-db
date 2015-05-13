@@ -29,6 +29,26 @@ module Restforce
           false
         end
 
+        def to_salesforce?
+          true
+        end
+
+        def to_database?
+          true
+        end
+
+      end
+
+      class AlwaysToSalesforce < Always
+        def to_database?
+          false
+        end
+      end
+
+      class AlwaysToDatabase < Always
+        def to_salesforce?
+          false
+        end
       end
 
     end
