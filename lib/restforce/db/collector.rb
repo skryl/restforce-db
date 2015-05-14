@@ -14,6 +14,7 @@ module Restforce
       # runner  - A Restforce::DB::Runner instance.
       def initialize(mapping, runner = Runner.new)
         @mapping = mapping
+        @strategy = mapping.strategy
         @runner = runner
       end
 
@@ -24,12 +25,13 @@ module Restforce
       # accumulator - A Hash-like accumulator object.
       #
       # Returns a Hash mapping Salesforce ID/type combinations to accumulators.
-      def run(accumulator = nil)
+      def run(accumulator = nil, history = nil)
         @accumulated_changes = accumulator || accumulated_changes
+        @incremental_changes = history     || {}
 
         @runner.run(@mapping) do |run|
           run.salesforce_instances.each { |instance| accumulate(instance) } if @strategy.to_database?
-          run.database_instances.each { |instance| accumulate(instance) }   if @strategy.to_salesforce?
+          run.database_instances.each   { |instance| accumulate(instance) } if @strategy.to_salesforce?
         end
 
         accumulated_changes
@@ -54,10 +56,11 @@ module Restforce
       #
       # Returns nothing.
       def accumulate(record)
-        accumulated_changes[key_for(record)].store(
-          record.last_update,
-          @mapping.convert(@mapping.salesforce_model, record.attributes),
-        )
+        key     = key_for(record)
+        changes = (@incremental_changes[key.first] || record).attributes
+
+        accumulated_changes[key].store(record.last_update,
+          @mapping.convert(@mapping.salesforce_model, changes))
       end
 
       # Internal: Get a unique key with enough information to look up the passed

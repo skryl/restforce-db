@@ -11,7 +11,7 @@ module Restforce
       include FileDaemon
 
       DEFAULT_INTERVAL = 5
-      DEFAULT_DELAY = 1
+      DEFAULT_DELAY = -1
 
       attr_accessor :logger, :tracker
 
@@ -30,6 +30,7 @@ module Restforce
         @logger   = options.fetch(:logger)
         @tracker  = options.fetch(:tracker)
         @exit     = options.fetch(:run_once)
+        @history  = options.fetch(:history)
 
         DB.reset
         DB.configure { |config| config.parse(options[:config]) }
@@ -41,7 +42,7 @@ module Restforce
       #
       # Returns nothing.
       def start
-        trap_signals
+        # trap_signals
 
         loop do
           runtime = Benchmark.realtime { perform }
@@ -160,7 +161,7 @@ module Restforce
       #
       # Returns nothing.
       def collect(mapping)
-        Collector.new(mapping, runner).run(@changes)
+        Collector.new(mapping, runner).run(@changes, @history)
       end
 
       # Internal: Update the associated records and Salesforce lookups for

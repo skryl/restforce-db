@@ -27,7 +27,7 @@ module Restforce
 
         @runner.run(@mapping) do |run|
           run.salesforce_instances.each { |instance| verify_associations(instance) } if @strategy.to_database?
-          run.database_instances.each { |instance| verify_associations(instance) }   if @strategy.to_salesforce?
+          run.database_instances.each   { |instance| verify_associations(instance) } if @strategy.to_salesforce?
         end
       end
 
