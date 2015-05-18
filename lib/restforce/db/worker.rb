@@ -11,7 +11,7 @@ module Restforce
       include FileDaemon
 
       DEFAULT_INTERVAL = 5
-      DEFAULT_DELAY = -1
+      DEFAULT_DELAY = 1
 
       attr_accessor :logger, :tracker
 
@@ -29,6 +29,7 @@ module Restforce
         @verbose  = options.fetch(:verbose)  { false }
         @logger   = options.fetch(:logger)
         @tracker  = options.fetch(:tracker)
+        @runner   = options.fetch(:runner)
         @exit     = options.fetch(:run_once)
         @history  = options.fetch(:history)
 

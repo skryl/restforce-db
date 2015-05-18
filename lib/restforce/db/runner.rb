@@ -8,7 +8,7 @@ module Restforce
     class Runner
 
       attr_reader :last_run
-      attr_accessor :before, :after
+      attr_accessor :before, :after, :only
 
       # Public: Initialize a new Restforce::DB::Runner.
       #
@@ -71,7 +71,7 @@ module Restforce
       #
       # Returns a Hash.
       def options
-        { after: after, before: before }
+        { after: after, before: before, only: only }
       end
 
     end

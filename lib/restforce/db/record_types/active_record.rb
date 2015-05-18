@@ -59,6 +59,7 @@ module Restforce
           scope = @record_type.where("updated_at > synchronized_at OR synchronized_at IS NULL")
           scope = scope.where("updated_at < ?", options[:before]) if options[:before]
           scope = scope.where("updated_at >= ?", options[:after]) if options[:after]
+          scope = scope.where("salesforce_id in (?)", options[:only]) if options[:only]
 
           scope.map do |record|
             instance_type.new(@record_type, record, @mapping)
