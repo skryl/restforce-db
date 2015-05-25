@@ -12,7 +12,8 @@ module Restforce
       #
       # mapping - A Restforce::DB::Mapping.
       def initialize(mapping)
-        @mapping = mapping
+        @mapping  = mapping
+        @strategy = mapping.strategy
       end
 
       # Public: Synchronize records for the current mapping from a Hash of
@@ -34,8 +35,8 @@ module Restforce
           salesforce_instance = @mapping.salesforce_record_type.find(id)
           next unless database_instance && salesforce_instance
 
-          update(database_instance, accumulator)
-          update(salesforce_instance, accumulator)
+          update(database_instance, accumulator)   if @strategy.to_database?
+          update(salesforce_instance, accumulator) if @strategy.to_salesforce?
         end
       end
 
@@ -52,7 +53,6 @@ module Restforce
         diff = accumulator.diff(@mapping.convert(@mapping.salesforce_model, instance.attributes))
         attributes = @mapping.convert_from_salesforce(instance.record_type, diff)
 
-        return if attributes.empty?
         instance.update!(attributes)
       end
 

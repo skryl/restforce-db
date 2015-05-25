@@ -14,6 +14,7 @@ module Restforce
       # runner  - A Restforce::DB::Runner instance.
       def initialize(mapping, runner = Runner.new)
         @mapping = mapping
+        @strategy = mapping.strategy
         @runner = runner
       end
 
