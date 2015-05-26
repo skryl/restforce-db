@@ -9,6 +9,5 @@
 /pkg/
 /spec/reports/
 /tmp/
-/test/config/*
 
 .DS_Store

@@ -28,7 +28,7 @@ module Restforce
         when Hash
           load(obj)
         when String
-          settings = YAML.load_file(file_path)
+          settings = YAML.load_file(obj)
           load(settings["client"])
         end
       end
