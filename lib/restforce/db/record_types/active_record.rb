@@ -57,9 +57,12 @@ module Restforce
         # Returns an Array of Restforce::DB::Instances::ActiveRecord instances.
         def all(options = {})
           scope = @record_type.where("updated_at > synchronized_at OR synchronized_at IS NULL")
-          scope = scope.where("updated_at < ?",  options[:before]) if options[:before]
-          scope = scope.where("updated_at >= ?", options[:after])  if options[:after]
-          scope = scope.where("id in (?)",       options[:only])   if options[:only]
+          if options[:only]
+            scope = scope.where("id in (?)",       options[:only])   if options[:only]
+          else
+            scope = scope.where("updated_at < ?",  options[:before]) if options[:before]
+            scope = scope.where("updated_at >= ?", options[:after])  if options[:after]
+          end
 
           scope.map do |record|
             instance_type.new(@record_type, record, @mapping)
